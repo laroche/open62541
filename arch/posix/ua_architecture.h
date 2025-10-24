@@ -32,7 +32,7 @@
 # endif
 #endif
 
-#define UA_IPV6 1
+#define UA_IPV6 1 /* 0 */
 #define UA_SOCKET int
 #define UA_INVALID_SOCKET -1
 #define UA_ERRNO errno
