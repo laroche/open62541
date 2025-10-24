@@ -144,9 +144,9 @@ START_TEST(Client_read_async) {
 
 static void
 asyncReadNodeClassAttributeCallback(UA_Client *client, void *userdata,
-                                    UA_UInt32 requestId, UA_StatusCode status,
+                                    UA_UInt32 requestId, UA_StatusCode status_async,
                                     UA_NodeClass *nodeClass) {
-    ck_assert_uint_eq(status, UA_STATUSCODE_GOOD);
+    ck_assert_uint_eq(status_async, UA_STATUSCODE_GOOD);
     UA_UInt16 *asyncCounter = (UA_UInt16*)userdata;
     (*asyncCounter)++;
 }
