@@ -409,7 +409,11 @@ setDefaultConfig(UA_ServerConfig *conf, UA_UInt16 portNumber) {
 
     if(conf->serverUrlsSize > 0) {
         UA_LOG_WARNING(conf->logging, UA_LOGCATEGORY_USERLAND,
-                       "ServerUrls already set. Overriding.");
+                       "ServerUrls already set. Overriding to opc.tcp://:%u.", portNumber);
+        for (unsigned n = 0; n < conf->serverUrlsSize; n++) {
+            UA_LOG_WARNING(conf->logging, UA_LOGCATEGORY_USERLAND,
+			   "ServerUrls[%u] until now: %s", n, conf->serverUrls[n].data);
+        }
         UA_Array_delete(conf->serverUrls, conf->serverUrlsSize,
                         &UA_TYPES[UA_TYPES_STRING]);
         conf->serverUrls = NULL;
