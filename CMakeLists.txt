@@ -9,6 +9,16 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
 
+#message(STATUS "CMAKE_C_FLAGS:                  \"${CMAKE_C_FLAGS}\"")
+#message(STATUS "CMAKE_C_FLAGS_DEBUG:            \"${CMAKE_C_FLAGS_DEBUG}\"")
+#message(STATUS "CMAKE_C_FLAGS_MINSIZEREL:       \"${CMAKE_C_FLAGS_MINSIZEREL}\"")
+#message(STATUS "CMAKE_C_FLAGS_RELEASE:          \"${CMAKE_C_FLAGS_RELEASE}\"")
+#message(STATUS "CMAKE_C_FLAGS_RELWITHDEBINFO:   \"${CMAKE_C_FLAGS_RELWITHDEBINFO}\"")
+#SET(CMAKE_CXX_FLAGS_DEBUG "-g")
+#SET(CMAKE_CXX_FLAGS_MINSIZEREL "-Os -DNDEBUG")
+#SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+#SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+
 string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/cmake")
@@ -103,7 +113,7 @@ option(UA_ENABLE_METHODCALLS "Enable the Method service set" ON)
 option(UA_ENABLE_SUBSCRIPTIONS "Enable subscriptions support" ON)
 option(UA_ENABLE_SUBSCRIPTIONS_EVENTS "Enable event monitoring" ON)
 option(UA_ENABLE_DA "Enable OPC UA DataAccess (Part 8) definitions" ON)
-option(UA_ENABLE_HISTORIZING "Enable basic support for historical access (client and server)" ON)
+option(UA_ENABLE_HISTORIZING "Enable basic support for historical access (client and server)" OFF)
 option(UA_ENABLE_DISCOVERY "Enable Discovery Service (LDS)" ON)
 option(UA_ENABLE_JSON_ENCODING "Enable JSON encoding" ON)
 option(UA_ENABLE_XML_ENCODING "Enable XML encoding (EXPERIMENTAL)" OFF)
@@ -137,11 +147,12 @@ mark_as_advanced(UA_ENABLE_PARSING)
 option(UA_ENABLE_INLINABLE_EXPORT "Export 'static inline' methods as regular API" OFF)
 mark_as_advanced(UA_ENABLE_INLINABLE_EXPORT)
 
-option(UA_ENABLE_DISCOVERY_MULTICAST "Enable Discovery Service with multicast support (LDS-ME)" OFF)
+option(UA_ENABLE_DISCOVERY_MULTICAST "Enable Discovery Service with multicast support (LDS-ME)" ON)
 mark_as_advanced(UA_ENABLE_DISCOVERY_MULTICAST)
 
 # security provider
 set(UA_ENCRYPTION_PLUGINS "MBEDTLS" "OPENSSL" "LIBRESSL")
+# MBEDTLS
 set(UA_ENABLE_ENCRYPTION "OFF" CACHE STRING "Encryption support (LibreSSL EXPERIMENTAL)")
 SET_PROPERTY(CACHE UA_ENABLE_ENCRYPTION PROPERTY STRINGS "OFF" ${UA_ENCRYPTION_PLUGINS})
 option(UA_ENABLE_ENCRYPTION_OPENSSL "Deprecated: Enable encryption support (uses openssl)" OFF)
@@ -149,6 +160,7 @@ mark_as_advanced(UA_ENABLE_ENCRYPTION_OPENSSL)
 option(UA_ENABLE_ENCRYPTION_MBEDTLS "Deprecated: Enable encryption support (uses mbedTLS)" OFF)
 mark_as_advanced(UA_ENABLE_ENCRYPTION_MBEDTLS)
 
+# ON
 option(UA_ENABLE_CERT_REJECTED_DIR  "Enable specifying directory for rejected certificates (with mbedTLS)" OFF)
 mark_as_advanced(UA_ENABLE_CERT_REJECTED_DIR)
 
@@ -218,6 +230,7 @@ if(UA_ENABLE_TPM2_KEYSTORE)
 endif()
 
 # Namespace Zero
+# FULL
 set(UA_NAMESPACE_ZERO "REDUCED" CACHE STRING "Completeness of the generated namespace zero (minimal/reduced/full)")
 SET_PROPERTY(CACHE UA_NAMESPACE_ZERO PROPERTY STRINGS "MINIMAL" "REDUCED" "FULL")
 if(UA_NAMESPACE_ZERO STREQUAL "MINIMAL")
@@ -306,7 +319,7 @@ option(UA_ENABLE_DEBUG_SANITIZER "Use sanitizer in debug mode" ON)
 mark_as_advanced(UA_ENABLE_DEBUG_SANITIZER)
 
 # General PubSub setup
-option(UA_ENABLE_PUBSUB "Enable the PubSub protocol" ON)
+option(UA_ENABLE_PUBSUB "Enable the PubSub protocol" OFF)
 
 option(UA_ENABLE_PUBSUB_ENCRYPTION "Enable encryption of the PubSub payload" OFF)
 mark_as_advanced(UA_ENABLE_PUBSUB_ENCRYPTION)
@@ -320,7 +333,7 @@ if(UA_ENABLE_PUBSUB_SKS)
     endif()
 endif()
 
-option(UA_ENABLE_PUBSUB_INFORMATIONMODEL "Enable PubSub information model twin" ON)
+option(UA_ENABLE_PUBSUB_INFORMATIONMODEL "Enable PubSub information model twin" OFF)
 if(UA_ENABLE_PUBSUB_INFORMATIONMODEL)
     if(NOT UA_ENABLE_PUBSUB)
         message(FATAL_ERROR "PubSub information model representation cannot be used with disabled PubSub function.")
@@ -410,6 +423,7 @@ mark_as_advanced(UA_FILE_NS0_BLACKLIST)
 option(UA_ENABLE_DISCOVERY_SEMAPHORE "Enable Discovery Semaphore support" ON)
 mark_as_advanced(UA_ENABLE_DISCOVERY_SEMAPHORE)
 
+# ON
 option(UA_ENABLE_UNIT_TESTS_MEMCHECK "Use Valgrind (Linux) or DrMemory (Windows) to detect memory leaks when running the unit tests" OFF)
 mark_as_advanced(UA_ENABLE_UNIT_TESTS_MEMCHECK)
 
@@ -440,9 +454,9 @@ if(CMAKE_BUILD_TYPE MATCHES DEBUG)
 endif()
 
 # Build Targets
-option(UA_BUILD_EXAMPLES "Build example servers and clients" OFF)
-option(UA_BUILD_TOOLS "Build OPC UA shell tools" OFF)
-option(UA_BUILD_UNIT_TESTS "Build the unit tests" OFF)
+option(UA_BUILD_EXAMPLES "Build example servers and clients" ON)
+option(UA_BUILD_TOOLS "Build OPC UA shell tools" ON)
+option(UA_BUILD_UNIT_TESTS "Build the unit tests" ON)
 option(UA_BUILD_FUZZING "Build the fuzzing executables" OFF)
 mark_as_advanced(UA_BUILD_FUZZING)
 if(UA_BUILD_FUZZING)
@@ -585,16 +599,20 @@ endfunction()
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
     check_add_cc_flag("-std=c99")   # C99 mode
     check_add_cc_flag("-pipe")      # Avoid writing temporary files (for compiler speed)
+    if(UA_DEBUG)
+        check_add_cc_flag("-Og")
+    endif()
     check_add_cc_flag("-Wall")      # Warnings
     check_add_cc_flag("-Wextra")    # More warnings
     check_add_cc_flag("-Wpedantic") # Standard compliance
+    check_add_cc_flag("-Wshadow")
     if(UA_FORCE_WERROR)
         check_add_cc_flag("-Werror") # All warnings are errors
         check_add_cc_flag("-Wunused-command-line-argument") # Warning for command line args instead of error
     endif()
 
-    check_add_cc_flag("-Wno-static-in-inline") # Clang doesn't like the use of static inline methods inside static inline methods
-    check_add_cc_flag("-Wno-overlength-strings") # May happen in the nodeset compiler when complex values are directly encoded
+    #check_add_cc_flag("-Wno-static-in-inline") # Clang doesn't like the use of static inline methods inside static inline methods
+    #check_add_cc_flag("-Wno-overlength-strings") # May happen in the nodeset compiler when complex values are directly encoded
     check_add_cc_flag("-Wno-unused-parameter") # some methods may require unused arguments to cast to a method pointer
     check_add_cc_flag("-Wno-maybe-uninitialized") # too many false positives
 
@@ -624,12 +642,26 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
     check_add_cc_flag("-Wnested-externs")
     check_add_cc_flag("-Wmultichar")
     check_add_cc_flag("-Wundef")
-    check_add_cc_flag("-fno-strict-aliasing") # fewer compiler assumptions about pointer types
+    #check_add_cc_flag("-fno-strict-aliasing") # fewer compiler assumptions about pointer types
     check_add_cc_flag("-fexceptions") # recommended for multi-threaded C code, also in combination with C++ code
+
+    #check_add_cc_flag("-Wparentheses")
+    #check_add_cc_flag("-Wsequence-point")
+    #check_add_cc_flag("-Wpointer-arith")
+    #check_add_cc_flag("-Wunreachable-code")
+    #check_add_cc_flag("-Wuninitialized")
+    #check_add_cc_flag("-Wlogical-not-parentheses")
+    #check_add_cc_flag("-Wlogical-op")
+
+    #check_add_cc_flag("-fanalyzer")
 
     # Generate position-independent code for shared libraries (adds a performance penalty)
     if(BUILD_SHARED_LIBS)
         add_cc_flag("-fPIC")
+    else()
+        if(UNIX AND UA_ENABLE_AMALGAMATION)
+            add_cc_flag("-fPIC")
+        endif()
     endif()
 
     if(UA_MULTITHREADING GREATER_EQUAL 100 AND NOT WIN32)
@@ -651,7 +683,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
     # Inter Procedural Optimization / Link Time Optimization (should be same as -flto)
     # IPO requires too much memory for unit tests
     # GCC docu recommends to compile all files with the same options, therefore ignore it completely
-    if(NOT UA_BUILD_UNIT_TESTS AND NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+    if(NOT UA_BUILD_UNIT_TESTS AND NOT UA_DEBUG AND NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION)
         include(CheckIPOSupported)
         check_ipo_supported(RESULT CC_HAS_IPO)
         if(CC_HAS_IPO)
@@ -751,17 +783,17 @@ if(UA_ENABLE_DISCOVERY_MULTICAST)
     
     # create a "fake" empty library to generate the export header macros
     if (APPLE)
-    	add_library(libmdnsd INTERFACE ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h)
+    	add_library(mdnsd INTERFACE ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h)
     else()
-    	add_library(libmdnsd ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h)
+    	add_library(mdnsd ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h)
     endif()
     
-    set_property(TARGET libmdnsd PROPERTY LINKER_LANGUAGE C)
-    set_property(TARGET libmdnsd PROPERTY DEFINE_SYMBOL "MDNSD_DYNAMIC_LINKING_EXPORT")
+    set_property(TARGET mdnsd PROPERTY LINKER_LANGUAGE C)
+    set_property(TARGET mdnsd PROPERTY DEFINE_SYMBOL "MDNSD_DYNAMIC_LINKING_EXPORT")
     configure_file("deps/mdnsd/libmdnsd/mdnsd_config_extra.in"
                    "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config_extra")
     file(READ "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config_extra" MDNSD_CONFIG_EXTRA)
-    generate_export_header(libmdnsd EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config.h"
+    generate_export_header(mdnsd EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config.h"
                            BASE_NAME MDNSD DEFINE_NO_DEPRECATED CUSTOM_CONTENT_FROM_VARIABLE MDNSD_CONFIG_EXTRA)
 endif()
 
