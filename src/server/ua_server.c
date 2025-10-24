@@ -735,8 +735,8 @@ UA_Server_run_startup(UA_Server *server) {
     if(config->maxSecureChannels != 0 &&
        (config->maxSessions == 0 || config->maxSessions > config->maxSecureChannels)) {
         UA_LOG_WARNING(config->logging, UA_LOGCATEGORY_SERVER,
-                       "Maximum SecureChannels count not enough for the "
-                       "maximum Sessions count");
+                       "Maximum SecureChannels count %d not enough for the "
+                       "maximum Sessions count %d", config->maxSecureChannels, config->maxSessions);
     }
 
     /* Add a regular callback for housekeeping tasks. With a 1s interval. */

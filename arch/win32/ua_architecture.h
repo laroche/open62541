@@ -30,7 +30,7 @@
 typedef SSIZE_T ssize_t;
 #endif
 
-#define UA_IPV6 1
+#define UA_IPV6 1 /* 0 */
 #define UA_SOCKET SOCKET
 #define UA_INVALID_SOCKET INVALID_SOCKET
 #define UA_ERRNO WSAGetLastError()
