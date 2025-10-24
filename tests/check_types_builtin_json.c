@@ -3068,7 +3068,7 @@ END_TEST
 
 START_TEST(UA_VariableAttributes_json_encode) {
 
-    const UA_VariableTypeAttributes UA_VariableTypeAttributes_default = {
+    const UA_VariableTypeAttributes UA_VariableTypeAttributes_default2 = {
         0,                           /* specifiedAttributes */
         {{0, NULL}, {0, NULL}},      /* displayName */
         {{0, NULL}, {0, NULL}},      /* description */
@@ -3080,7 +3080,7 @@ START_TEST(UA_VariableAttributes_json_encode) {
         true                         /* isAbstract */
     };
 
-    UA_VariableTypeAttributes src = UA_VariableTypeAttributes_default;
+    UA_VariableTypeAttributes src = UA_VariableTypeAttributes_default2;
     UA_Int32 myInteger = 42;
     UA_Variant_setScalar(&src.value, &myInteger, &UA_TYPES[UA_TYPES_INT32]);
     src.description = UA_LOCALIZEDTEXT("en-US","the answer");
