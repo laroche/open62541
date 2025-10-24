@@ -846,6 +846,10 @@ addMdnsRecordForNetworkLayer(UA_DiscoveryManager *dm, const UA_String *appName,
                                     true);
     if(retval != UA_STATUSCODE_GOOD) {
         UA_LOG_WARNING(dm->logging, UA_LOGCATEGORY_DISCOVERY,
+                       "DiscoveryUrl to parse: %.*s", (int)discoveryUrl->length, discoveryUrl->data);
+        UA_LOG_WARNING(dm->logging, UA_LOGCATEGORY_DISCOVERY,
+                       "Hostname might be invalid: %.*s", (int)hostname.length, hostname.data);
+        UA_LOG_WARNING(dm->logging, UA_LOGCATEGORY_DISCOVERY,
                        "Cannot add mDNS Record: %s", UA_StatusCode_name(retval));
         return retval;
     }
@@ -886,6 +890,7 @@ discovery_createMulticastSocket(UA_Server* server, UA_DiscoveryManager *dm) {
     size_t paramsSize = 5;
 
     UA_UInt16 port = 5353;
+    // UA_String address = UA_STRING("0.0.0.0");
     UA_String address = UA_STRING("224.0.0.251");
     UA_UInt32 ttl = 255;
     UA_Boolean reuse = true;
@@ -1193,8 +1198,17 @@ UA_Discovery_addRecord(UA_DiscoveryManager *dm, const UA_String *servername,
 
     size_t hostnameLen = hostname->length;
     size_t servernameLen = servername->length;
-    if(hostnameLen == 0 || servernameLen == 0)
+    if(hostnameLen == 0 || servernameLen == 0) {
+        UA_LOG_WARNING(dm->logging, UA_LOGCATEGORY_DISCOVERY,
+                       "Servername: %.*s", (int)servername->length, servername->data);
+        UA_LOG_WARNING(dm->logging, UA_LOGCATEGORY_DISCOVERY,
+                       "Hostname: %.*s", (int)hostname->length, hostname->data);
+#if 0
+        return UA_STATUSCODE_GOOD;
+#else
         return UA_STATUSCODE_BADOUTOFRANGE;
+#endif
+    }
 
     /* Use a limit for the hostname length to make sure full string fits into 63
      * chars (limited by DNS spec) */

@@ -567,6 +567,7 @@ Client_get_endpoints(void) {
     UA_String  expectedEndpoints[1];
     expectedEndpoints[0] = UA_STRING("opc.tcp://localhost:4840");
 
+#if !defined(UA_ENABLE_ENCRYPTION)
     // general check if expected endpoints are returned
     GetEndpointsAndCheck("opc.tcp://localhost:4840", NULL,expectedEndpoints, 1);
 
@@ -574,6 +575,7 @@ Client_get_endpoints(void) {
     GetEndpointsAndCheck("opc.tcp://localhost:4840",
                          "http://opcfoundation.org/UA-Profile/Transport/uatcp-uasc-uabinary",
                          expectedEndpoints, 1);
+#endif
 
     // filter transport profily by HTTPS, which should return no endpoint
     GetEndpointsAndCheck("opc.tcp://localhost:4840",

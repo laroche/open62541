@@ -39,9 +39,14 @@ serverOnNetworkCallback(const UA_ServerOnNetwork *serverOnNetwork, UA_Boolean is
                         UA_Boolean isTxtReceived, void *data) {
 
     if(discovery_url != NULL || !isServerAnnounce) {
+#if 0
         UA_LOG_DEBUG(UA_Log_Stdout, UA_LOGCATEGORY_SERVER,
                      "serverOnNetworkCallback called, but discovery URL "
                      "already initialized or is not announcing. Ignoring.");
+        UA_LOG_DEBUG(UA_Log_Stdout, UA_LOGCATEGORY_SERVER,
+                     "This is server %.*s",
+                (int)serverOnNetwork->discoveryUrl.length, serverOnNetwork->discoveryUrl.data);
+#endif
         return; // we already have everything we need or we only want server announces
     }
 
