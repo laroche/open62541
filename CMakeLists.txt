@@ -87,7 +87,7 @@ elseif("${UA_ARCHITECTURE}" STREQUAL "win32")
 elseif("${UA_ARCHITECTURE}" STREQUAL "zephyr")
     set(UA_ARCHITECTURE_ZEPHYR 1)
 elseif("${UA_ARCHITECTURE}" STREQUAL "freertos-lwip")
-    set(UA_ARCHITECTURE_LWIP 1)
+    #set(UA_ARCHITECTURE_LWIP 1)
     set(UA_ARCHITECTURE_FREERTOS 1)
 elseif("${UA_ARCHITECTURE}" STREQUAL "posix-lwip")
     set(UA_ARCHITECTURE_LWIP 1)
@@ -104,6 +104,16 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build" FORCE)
 endif()
 
+#message(STATUS "CMAKE_C_FLAGS:                  \"${CMAKE_C_FLAGS}\"")
+#message(STATUS "CMAKE_C_FLAGS_DEBUG:            \"${CMAKE_C_FLAGS_DEBUG}\"")
+#message(STATUS "CMAKE_C_FLAGS_MINSIZEREL:       \"${CMAKE_C_FLAGS_MINSIZEREL}\"")
+#message(STATUS "CMAKE_C_FLAGS_RELEASE:          \"${CMAKE_C_FLAGS_RELEASE}\"")
+#message(STATUS "CMAKE_C_FLAGS_RELWITHDEBINFO:   \"${CMAKE_C_FLAGS_RELWITHDEBINFO}\"")
+#SET(CMAKE_CXX_FLAGS_DEBUG "-g")
+#SET(CMAKE_CXX_FLAGS_MINSIZEREL "-Os -DNDEBUG")
+#SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+#SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+
 string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
 
 option(UA_ENABLE_AMALGAMATION "Concatenate the library to a single file open62541.h/.c" OFF)
@@ -114,12 +124,12 @@ option(UA_ENABLE_METHODCALLS "Enable the Method service set" ON)
 option(UA_ENABLE_SUBSCRIPTIONS "Enable subscriptions support" ON)
 option(UA_ENABLE_SUBSCRIPTIONS_EVENTS "Enable event monitoring" ON)
 option(UA_ENABLE_DA "Enable OPC UA DataAccess (Part 8) definitions" ON)
-option(UA_ENABLE_HISTORIZING "Enable basic support for historical access (client and server)" ON)
+option(UA_ENABLE_HISTORIZING "Enable basic support for historical access (client and server)" OFF)
 option(UA_ENABLE_DISCOVERY "Enable Discovery Service (LDS)" ON)
 option(UA_ENABLE_JSON_ENCODING "Enable JSON encoding" ON)
 option(UA_ENABLE_XML_ENCODING "Enable XML encoding" ON)
 option(UA_ENABLE_NODESETLOADER "Enable nodesetLoader public API" OFF)
-option(UA_ENABLE_GDS_PUSHMANAGEMENT "Enable GDS pushManagement support" OFF)
+option(UA_ENABLE_GDS_PUSHMANAGEMENT "Enable GDS pushManagement support" ON)
 option(UA_ENABLE_DATATYPES_ALL "Generate all datatypes for namespace zero (uses more binary space)" ON)
 option(UA_ENABLE_RBAC "Enable Role-Based Access Control (EXPERIMENTAL - NOT FOR PRODUCTION)" OFF)
 
@@ -152,10 +162,10 @@ mark_as_advanced(UA_ENABLE_INLINABLE_EXPORT)
 
 # mDNS provider
 set(UA_MDNS_PLUGINS "MDNSD" "AVAHI")
-set(UA_ENABLE_DISCOVERY_MULTICAST "OFF" CACHE STRING "mDNS discovery support")
+set(UA_ENABLE_DISCOVERY_MULTICAST "MDNSD" CACHE STRING "mDNS discovery support")
 mark_as_advanced(UA_ENABLE_DISCOVERY_MULTICAST)
 SET_PROPERTY(CACHE UA_ENABLE_DISCOVERY_MULTICAST PROPERTY STRINGS "OFF" ${UA_MDNS_PLUGINS})
-option(UA_ENABLE_DISCOVERY_MULTICAST_MDNSD "Enable mDNS discovery support (uses mdnsd)" OFF)
+option(UA_ENABLE_DISCOVERY_MULTICAST_MDNSD "Enable mDNS discovery support (uses mdnsd)" ON)
 mark_as_advanced(UA_ENABLE_DISCOVERY_MULTICAST_MDNSD)
 option(UA_ENABLE_DISCOVERY_MULTICAST_AVAHI "Enable mDNS discovery support (uses Avahi)" OFF)
 mark_as_advanced(UA_ENABLE_DISCOVERY_MULTICAST_AVAHI)
@@ -189,11 +199,11 @@ endif()
 
 # security provider
 set(UA_ENCRYPTION_PLUGINS "MBEDTLS" "OPENSSL" "LIBRESSL")
-set(UA_ENABLE_ENCRYPTION OFF CACHE STRING "Encryption support (LibreSSL EXPERIMENTAL)")
+set(UA_ENABLE_ENCRYPTION MBEDTLS CACHE STRING "Encryption support (LibreSSL EXPERIMENTAL)")
 SET_PROPERTY(CACHE UA_ENABLE_ENCRYPTION PROPERTY STRINGS "OFF" ${UA_ENCRYPTION_PLUGINS})
 option(UA_ENABLE_ENCRYPTION_OPENSSL "Deprecated: Enable encryption support (uses openssl)" OFF)
 mark_as_advanced(UA_ENABLE_ENCRYPTION_OPENSSL)
-option(UA_ENABLE_ENCRYPTION_MBEDTLS "Deprecated: Enable encryption support (uses mbedTLS)" OFF)
+option(UA_ENABLE_ENCRYPTION_MBEDTLS "Deprecated: Enable encryption support (uses mbedTLS)" ON)
 mark_as_advanced(UA_ENABLE_ENCRYPTION_MBEDTLS)
 
 list (FIND UA_ENCRYPTION_PLUGINS ${UA_ENABLE_ENCRYPTION} _tmp)
@@ -253,7 +263,7 @@ if(UA_ENABLE_TPM2_KEYSTORE)
 endif()
 
 # Namespace Zero
-set(UA_NAMESPACE_ZERO "REDUCED" CACHE STRING "Completeness of the generated namespace zero (none/minimal/reduced/full)")
+set(UA_NAMESPACE_ZERO "FULL" CACHE STRING "Completeness of the generated namespace zero (none/minimal/reduced/full)")
 SET_PROPERTY(CACHE UA_NAMESPACE_ZERO PROPERTY STRINGS "NONE" "MINIMAL" "REDUCED" "FULL")
 if(UA_NAMESPACE_ZERO STREQUAL "MINIMAL" OR UA_NAMESPACE_ZERO STREQUAL "NONE")
     set(UA_GENERATED_NAMESPACE_ZERO OFF)
@@ -419,7 +429,7 @@ option(UA_DEBUG_DUMP_PKGS "Dump every package received by the server as hexdump 
 mark_as_advanced(UA_DEBUG_DUMP_PKGS)
 
 if(CMAKE_VERSION VERSION_GREATER 3.6)
-    set(UA_ENABLE_STATIC_ANALYZER "OFF" CACHE STRING "Enable installed static analyzer during build process (off/minimal/reduced/full)")
+    set(UA_ENABLE_STATIC_ANALYZER "FULL" CACHE STRING "Enable installed static analyzer during build process (off/minimal/reduced/full)")
     mark_as_advanced(UA_ENABLE_STATIC_ANALYZER)
     SET_PROPERTY(CACHE UA_ENABLE_STATIC_ANALYZER PROPERTY STRINGS "OFF" "MINIMAL" "REDUCED" "FULL")
 endif()
@@ -432,9 +442,9 @@ if(CMAKE_BUILD_TYPE MATCHES DEBUG)
 endif()
 
 # Build Targets
-option(UA_BUILD_EXAMPLES "Build example servers and clients" OFF)
-option(UA_BUILD_TOOLS "Build OPC UA shell tools" OFF)
-option(UA_BUILD_UNIT_TESTS "Build the unit tests" OFF)
+option(UA_BUILD_EXAMPLES "Build example servers and clients" ON)
+option(UA_BUILD_TOOLS "Build OPC UA shell tools" ON)
+option(UA_BUILD_UNIT_TESTS "Build the unit tests" ON)
 option(UA_BUILD_FUZZING "Build the fuzzing executables" OFF)
 mark_as_advanced(UA_BUILD_FUZZING)
 if(UA_BUILD_FUZZING)
@@ -605,10 +615,16 @@ if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang") AND
 
     check_add_cc_flag("-std=c99")   # C99 mode
     check_add_cc_flag("-pipe")      # Avoid writing temporary files (for compiler speed)
+    if(UA_DEBUG)
+        check_add_cc_flag("-Og")
+    endif()
     check_add_cc_flag("-Wall")      # Warnings
     check_add_cc_flag("-Wextra")    # More warnings
     check_add_cc_flag("-Wpedantic") # Standard compliance
-    #check_add_cc_flag("-Wshadow")  # still disabled per default
+    #check_add_cc_flag("-Wconversion")
+    #check_add_cc_flag("-Wshadow")
+    #check_add_cc_flag("-Weverything -Wno-padded -Wno-unsafe-buffer-usage -Wno-reserved-identifier -Wno-declaration-after-statement -Wno-cast-function-type-strict -Wno-class-varargs -Wno-used-but-marked-unused")
+    #check_add_cc_flag("-Wno-conditional-uninitialized -Wno-switch-enum -Wno-covered-switch-default -Wno-cast-align -Wno-double-promotion -Wno-float-equal -Wno-shadow -Wno-documentation-unknown-command")
     if(UA_FORCE_WERROR)
         check_add_cc_flag("-Werror") # All warnings are errors
         check_add_cc_flag("-Wunused-command-line-argument") # Warning for command line args instead of error
@@ -627,7 +643,7 @@ if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang") AND
     # But modern compilers do a detailed analysis of values
     # are actually used uninitialized after a jump:
     # TODO: The following flag should not be required
-    check_add_cc_flag("-Wno-jump-misses-init")
+    #check_add_cc_flag("-Wno-jump-misses-init")
 
     # Check that format strings (printf/scanf) are sane
     check_add_cc_flag("-Wformat")
@@ -648,7 +664,7 @@ if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang") AND
     check_add_cc_flag("-Wnested-externs")
     check_add_cc_flag("-Wmultichar")
     check_add_cc_flag("-Wundef")
-    check_add_cc_flag("-fno-strict-aliasing") # fewer compiler assumptions about pointer types
+    #check_add_cc_flag("-fno-strict-aliasing") # fewer compiler assumptions about pointer types
     check_add_cc_flag("-fexceptions") # recommended for multi-threaded C code, also in combination with C++ code
 
     # Tree-shaking so that only used functions and data get linked into static binaries
@@ -656,9 +672,23 @@ if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang") AND
     check_add_cc_flag("-ffunction-sections")
     check_add_cc_flag("-fdata-sections")
 
+    #check_add_cc_flag("-Wparentheses")
+    #check_add_cc_flag("-Wsequence-point")
+    #check_add_cc_flag("-Wpointer-arith")
+    #check_add_cc_flag("-Wunreachable-code")
+    #check_add_cc_flag("-Wuninitialized")
+    #check_add_cc_flag("-Wlogical-not-parentheses")
+    #check_add_cc_flag("-Wlogical-op")
+
+    #check_add_cc_flag("-fanalyzer")
+
     # Generate position-independent code for shared libraries (adds a performance penalty)
     if(BUILD_SHARED_LIBS)
         add_cc_flag("-fPIC")
+    else()
+        if(UNIX AND UA_ENABLE_AMALGAMATION)
+            add_cc_flag("-fPIC")
+        endif()
     endif()
 
     # Hardened build (stack protection, etc.)
@@ -1062,8 +1092,8 @@ endif()
 if(UA_ARCHITECTURE_FREERTOS)
     # Assume the FreeRTOS POSIX "Simulator".
     # Change this to directly include the source files if required.
-    set(FREERTOS_KERNEL_PATH "~/software/FreeRTOSv202411.00/FreeRTOS/Source" CACHE STRING "")
-    set(FREERTOS_PORT_PATH "~/software/FreeRTOSv202411.00/FreeRTOS/Demo/Posix_GCC" CACHE STRING "")
+    set(FREERTOS_KERNEL_PATH "/home/flaroche/data/basicip-devel/FreeRTOS/FreeRTOS/FreeRTOS/Source" CACHE STRING "")
+    set(FREERTOS_PORT_PATH "/home/flaroche/data/basicip-devel/FreeRTOS/FreeRTOS/Demo/Posix_GCC" CACHE STRING "")
     include(arch/freertos/freertos.cmake)
     include_directories(${FREERTOS_PORT_PATH} "${FREERTOS_KERNEL_PATH}/include")
     include_directories("${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/Posix")
