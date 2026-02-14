@@ -124,6 +124,12 @@ UA_DiscoveryManager_cleanupTimedOut(UA_Server *server, void *data) {
                             "Registration of server with URI %S has timed out "
                             "and is removed", current->registeredServer.serverUri);
             }
+            for(size_t i = 0; i < current->registeredServer.discoveryUrlsSize; i++) {
+                UA_LOG_INFO(server->config.logging, UA_LOGCATEGORY_SERVER,
+                            "Registration of server with discoveryUrls %.*s has timed out and is removed",
+                            (int)current->registeredServer.discoveryUrls[i].length,
+                            current->registeredServer.discoveryUrls[i].data);
+            }
             LIST_REMOVE(current, pointers);
             UA_RegisteredServer_clear(&current->registeredServer);
             UA_free(current);
