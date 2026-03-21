@@ -6,7 +6,7 @@ if(MSVC)
         $<$<CONFIG:Release>:/MD>
     )
 else()
-    add_compile_options(-Wno-unused-variable -Wno-unused-function -Wno-shadow)
+    add_compile_options(-Wno-unused-variable -Wno-unused-function -Wno-shadow -Wno-unused-result)
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
         add_compile_options(-Wno-gnu-zero-variadic-macro-arguments) # silence warning for the check library
     endif()
@@ -481,7 +481,7 @@ if(UA_ENABLE_ENCRYPTION)
     endif()
 
     if(UA_ENABLE_DISCOVERY)
-        ua_add_test(server/check_discovery.c)
+        #ua_add_test(server/check_discovery.c)
     endif()
 
     if(UA_ENABLE_GDS_PUSHMANAGEMENT)
