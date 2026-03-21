@@ -64,7 +64,7 @@ _UA_BEGIN_DECLS
 typedef int SOCKET;
 #endif
 
-#define UA_IPV6 1
+#define UA_IPV6 1 /* 0 */
 #define UA_SOCKET int
 #define UA_INVALID_SOCKET -1
 #define UA_RESET_ERRNO do { errno = 0; } while(0)
